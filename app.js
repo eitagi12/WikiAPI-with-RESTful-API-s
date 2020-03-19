@@ -26,6 +26,8 @@ const articleShema = {
 
 const Article = mongoose.model("Article", articleShema);
 
+/////////// Requests Targetting all Articles ///////////
+
 app
   .route("/articles")
   .get(function(req, res) {
@@ -54,6 +56,64 @@ app
     Article.deleteMany(function(err) {
       if (!err) {
         res.send("Successfully deleted all articles.");
+      } else {
+        res.send(err);
+      }
+    });
+  });
+
+/////////// Requests Targetting A Specific Articles ///////////
+app
+  .route("/articles/:articleTitle")
+  .get(function(req, res) {
+    Article.findOne({ title: req.params.articleTitle }, function(
+      err,
+      foundArticle
+    ) {
+      if (foundArticle) {
+        res.send(foundArticle);
+      } else {
+        res.send(err);
+      }
+    });
+  })
+  ////// Use for update everything //////
+  .put(function(req, res) {
+    Article.updateOne(
+      { title: req.params.articleTitle },
+      { title: req.body.title, content: req.body.content },
+      { overwrite: true },
+      function(err, updatedArticle) {
+        if (updatedArticle) {
+          res.send("Article updated");
+        } else {
+          res.send(err);
+        }
+      }
+    );
+  })
+  ////// Use for update something //////
+  .patch(function(req, res) {
+    Article.updateOne(
+      { title: req.params.articleTitle },
+      { $set: req.body },
+      function(err, updatedArticle) {
+        if (updatedArticle) {
+          res.send("Article updated");
+        } else {
+          res.send(err);
+        }
+      }
+    );
+  })
+
+  .delete(function(req, res) {
+    Article.deleteOne({ title: req.params.articleTitle }, function(
+      err,
+      deletedArticle
+    ) {
+      if (deletedArticle) {
+        res.send("Article deleted");
       } else {
         res.send(err);
       }
